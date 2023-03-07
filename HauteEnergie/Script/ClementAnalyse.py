@@ -360,7 +360,7 @@ if __name__ == "__main__":
 
     # w15.plot_all_slice_hist(vmin=0, vmax=150, show=False)
     w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
-    w15.make_all_slice(200)
+    w15.make_all_slice(10000)
     w15.plot_all_slice_hist(vmin=0, vmax=5,show=False)
     print("DONE")
 #     w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
