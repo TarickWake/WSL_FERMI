@@ -10,7 +10,7 @@ from astropy.table import Table
 import numpy as np
 import os
 from matplotlib.animation import FuncAnimation
-
+from tqdm import tqdm
 os.chdir("/home/clem/WSL_FERMI")
 
 
@@ -48,7 +48,7 @@ def divisability(i, output=False):
     diviseur = []
     division_result = []
     if output == True:
-        for n in range(2, i // 2):
+        for n in tqdm(range(2, i // 2)):
             if i % n == 0:
                 notprimer = True
                 print(f"{i:_} est divisible par {n:_}")
@@ -62,7 +62,7 @@ def divisability(i, output=False):
         return np.array(diviseur), np.array(division_result)
 
     else:
-        for n in range(2, i // 2):
+        for n in tqdm(range(2, i // 2)):
             if i % n == 0:
                 notprimer = True
                 diviseur += [n]
@@ -207,7 +207,7 @@ class GammaFits:
         """génère la slice i"""
 
         if force_slice_number:
-            self
+            self #TODO Ajouter le cas ou on ne prend pas une division entière
             self.curent_slice = self.events_copy[self._number_per_slice * i:self._number_per_slice * (i + 1)]
         else:
             self.curent_slice = self.events_copy[self._number_per_slice * i:self._number_per_slice * (i + 1)]
@@ -217,7 +217,8 @@ class GammaFits:
         self.time_slice(nb_slice)
         self.all_slice = []
         self.name_slice = []
-        for i in range(self._nb_total_slice):
+        print("Création des slice en cours")
+        for i in tqdm(range(self._nb_total_slice)):
             self.name_slice += [str(i)]
             self.slice_gen(i)
             self.all_slice += [self.curent_slice]
@@ -227,53 +228,64 @@ class GammaFits:
         self.curent_slice = slice
         self.set_curent_slice_as_event()
 
-    def plot_all_slice_hist(self, norm='linear', vmin=0, vmax=200,show=True):
+    def plot_all_slice_hist(self, norm='linear', vmin=0, vmax=200, show=True):
         """plot all hist"""
-        first = True
-        i = 0
-        for slice in self.all_slice:
+
+        i = 1
+        print("Calcule de la statistique de toute les slice en cours ...")
+        self.set_slice_as_event(self.all_slice[0])
+        self.plot_hist2d(norm='linear', bins=(self.xedges_tot, self.yedges_tot), vmin=vmin, vmax=vmax,
+                         title=self.name_slice[0], show=show)
+        self.all_counts = self.counts
+        self.all_xedges = self.xedges
+        self.all_yedges = self.yedges
+
+        for slice in tqdm(self.all_slice[1:]):
             self.set_slice_as_event(slice)
             self.plot_hist2d(norm='linear', bins=(self.xedges_tot, self.yedges_tot), vmin=vmin, vmax=vmax,
-                             title=self.name_slice[i])
+                             title=self.name_slice[i],show=show)
             i += 1
-            if not first:
-                self.all_counts = np.dstack((self.all_counts, self.counts))
-                self.all_xedges = np.dstack((self.all_xedges, self.xedges))
-                self.all_yedges = np.dstack((self.all_yedges, self.yedges))
-                self.all_im = np.dstack((self.all_im, self.im))
-            if first:
-                self.all_counts = self.counts
-                self.all_xedges = self.xedges
-                self.all_yedges = self.yedges
-                self.all_im = self.im
-                first = False
-            if show :
-               plt.show()
-            else :
-                plt.clf()
-    def make_pcolormesh_param(self,slice_number):
+            self.all_counts = np.dstack((self.all_counts, self.counts))
+            self.all_xedges = np.dstack((self.all_xedges, self.xedges))
+            self.all_yedges = np.dstack((self.all_yedges, self.yedges))
+            # self.all_im = np.dstack((self.all_im, self.im))
+
+            # if show:
+            #     plt.show()
+            # else:
+            #     plt.clf()
+            #     plt.close()
+
+    def make_pcolormesh_param(self, slice_number):
         """
         Donne les paramètre du pcolormesh corespondant pour replot le hist2d en pcolor mesh
         :param slice_number: la slice selectionné
         :return: X,Y,Z : X contient les bort en X, Y les bord en Y, et Z le nombre de couts compté
         """
         X, Y = np.meshgrid(self.xedges_tot, self.yedges_tot)
-        Z = w15.all_counts[:,:,slice_number].T
-        return X,Y,Z
-    def plot_hist2d(self, norm=LogNorm(), bins=[360, 180], vmin=0, vmax=200, title=''):
+        Z = w15.all_counts[:, :, slice_number].T
+        return X, Y, Z
+
+    def plot_hist2d(self, norm=LogNorm(), bins=[360, 180], vmin=0, vmax=200, title='',show=True):
         """plot le hist 2D de la carte du ciel, avec et sans corection du zenith angle
         """
-        fig, ax = plt.subplots()
+
         self.zenith_angle_corection()
-        ax.set_xlabel('L (deg.)', fontsize=10)
-        ax.set_ylabel('B (deg.)', fontsize=10)
 
-        self.counts, self.xedges, self.yedges, self.im = ax.hist2d(self.L_cut, self.B_cut, bins=bins,
-                                                                   norm='linear', vmin=vmin, vmax=vmax)
-        plt.title(title)
+        if show:
+            fig, ax = plt.subplots()
+            ax.set_xlabel('L (deg.)', fontsize=10)
+            ax.set_ylabel('B (deg.)', fontsize=10)
 
-        fig.colorbar(self.im, ax=ax)
-        plt.show()
+            self.counts, self.xedges, self.yedges, self.im = ax.hist2d(self.L_cut, self.B_cut, bins=bins,
+                                                                       norm='linear', vmin=vmin, vmax=vmax)
+            plt.title(title)
+
+            fig.colorbar(self.im, ax=ax)
+            plt.show()
+        if not show:
+            self.counts, self.xedges, self.yedges = np.histogram2d(self.L_cut, self.B_cut, bins=bins)
+            # self.im =
 
     def keep_bin_edge(self):
         """plot le hist 2D de la carte du ciel, avec et sans corection du zenith angle
@@ -301,8 +313,6 @@ class GammaFits:
         counts1, xedges1, yedges1, im1 = axs[1].hist2d(self.L_cut, self.B_cut, bins=[360, 180], norm=LogNorm())
         fig.colorbar(im1, ax=axs[1])
         plt.show()
-
-
 
 
 class TwoWeek_Gamma_Fits:
@@ -345,10 +355,14 @@ class TwoWeek_Gamma_Fits:
 # gf.plot_hist2d()
 
 if __name__ == "__main__":
-    w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
-    w15.make_all_slice(23)
+    # w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
+    # w15.make_all_slice(23)
 
-    w15.plot_all_slice_hist(vmin=0, vmax=150,show=False)
+    # w15.plot_all_slice_hist(vmin=0, vmax=150, show=False)
+    w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
+    w15.make_all_slice(200)
+    w15.plot_all_slice_hist(vmin=0, vmax=5,show=False)
+    print("DONE")
 #     w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
 #     w16 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w016_p305_v001.fits")
 #     e15 = w15.events
