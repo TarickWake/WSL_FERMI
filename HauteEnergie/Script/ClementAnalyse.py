@@ -251,7 +251,15 @@ class GammaFits:
                plt.show()
             else :
                 plt.clf()
-
+    def make_pcolormesh_param(self,slice_number):
+        """
+        Donne les paramètre du pcolormesh corespondant pour replot le hist2d en pcolor mesh
+        :param slice_number: la slice selectionné
+        :return: X,Y,Z : X contient les bort en X, Y les bord en Y, et Z le nombre de couts compté
+        """
+        X, Y = np.meshgrid(self.xedges_tot, self.yedges_tot)
+        Z = w15.all_counts[:,:,slice_number].T
+        return X,Y,Z
     def plot_hist2d(self, norm=LogNorm(), bins=[360, 180], vmin=0, vmax=200, title=''):
         """plot le hist 2D de la carte du ciel, avec et sans corection du zenith angle
         """
