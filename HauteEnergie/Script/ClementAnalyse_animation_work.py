@@ -12,8 +12,9 @@ import pandas as pd
 import os
 from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
-
-os.chdir("/home/clem/WSL_FERMI")
+dir = input("Chemin dossier contenant les fichier fits : ???")
+if dir =='': dir="/home/clem/WSL_FERMI/"
+os.chdir(dir)
 
 
 def last_divider(x, d):
@@ -521,7 +522,7 @@ class GammaFitsPandas:
         Returns:
             None
     """
-        zenith_angle_mask = self.zenith_angle < 80
+        zenith_angle_mask = self.zenith_angle < 100
         self.L_cut = self.L[zenith_angle_mask]
         self.B_cut = self.B[zenith_angle_mask]
         self.events['L_cut'] = self.L[zenith_angle_mask]
