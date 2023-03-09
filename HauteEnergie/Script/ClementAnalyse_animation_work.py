@@ -12,9 +12,9 @@ import pandas as pd
 import os
 from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
-dir = input("Chemin dossier contenant les fichier fits : ???")
-if dir =='': dir="/home/clem/WSL_FERMI/"
-os.chdir(dir)
+# dir = input("Chemin dossier contenant les fichier fits : ???")
+# if dir =='': dir="/home/clem/WSL_FERMI/"
+# os.chdir(dir)
 
 
 def last_divider(x, d):
@@ -701,30 +701,3 @@ class TwoWeek_Gamma_Fits:
         plt.tight_layout()
         plt.show()
 
-
-# gf = GammaFits(fitsfile)
-# gf.show_info()
-# gf.plot_hist2d()
-w15_path = "HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits"
-w16_path = "HauteEnergie/Data/source_observation/lat_photon_weekly_w016_p305_v001.fits"
-w749_path = "HauteEnergie/Data/source_observation/lat_photon_weekly_w749_p305_v001.fits"
-w750_path = "HauteEnergie/Data/source_observation/lat_photon_weekly_w750_p305_v001.fits"
-if __name__ == "__main__":
-    # w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
-    # w15.make_all_slice(23)
-
-    # w15.plot_all_slice_hist(vmin=0, vmax=150, show=False)
-    w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
-    w15.make_all_slice(50)
-    w15.plot_all_slice_hist(vmin=0, vmax=5, show=False)
-    print("DONE")
-#     w15 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w015_p305_v001.fits")
-#     w16 = GammaFits("HauteEnergie/Data/source_observation/lat_photon_weekly_w016_p305_v001.fits")
-#     e15 = w15.events
-#     e16 = w16.events
-#     w15.plot_hist2d()
-#     w15_16 = TwoWeek_Gamma_Fits(w15, w16)
-#     w15_16.hist2D_compar()
-#     plt.imshow(((np.transpose(np.abs(np.abs(w15_16.counts2) - np.abs(w15_16.counts1)))) * 100) > 10000)
-#
-#
